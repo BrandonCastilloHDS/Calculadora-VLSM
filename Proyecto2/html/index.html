@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq"
+        crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="../CSS/app.css">
+    <title>Calculadora</title>
+</head>
+
+<body>
+
+    <header class="contenedorPrincipal">
+        <div class="contenido-contenedorPrincipal">
+            <h1>Calculadora <span> VLSM </span></h1>
+            <p>Arenas Garita Miguel</p>
+            <p>Castillo Maya Lorenzo Brandon</p>
+            <p>Diego Xd</p>
+        </div>
+    </header>
+
+    <section>
+        <h2 style="margin-top: 10px; margin-left: 20px;">Tipo de SubNeteo</h2>
+        <div class="radio-inputs">
+
+            <label class="radio">
+                <input type="radio" name="radio" id="VLSM">
+                <span class="name">VLSM</span>
+            </label>
+
+        </div>
+    </section>
+
+    <main style="margin: 20px 10px;">
+        <h2>Llene los campos del formulario</h2>
+
+
+
+        <div id="CalculadoraVLSM">
+            <form class="row g-3">
+                <div class="col-md-6">
+                    <label for="DireccionIP" class="form-label">Dirección IP</label>
+                    <input type="text" class="form-control" id="DireccionIP" placeholder="198.0.0.0">
+                </div>
+                <div class="col-md-6">
+                    <label for="Mascara" class="form-label">Bits de Mascara</label>
+                    <input type="number" class="form-control" id="Mascara"
+                        placeholder="Ingrese el número de bits de la Mascara">
+                </div>
+
+                <div class="col-md-6">
+                    <label for="No_Subredes" class="form-label">Número de Subredes</label>
+                    <input type="number" class="form-control" id="NumRedes" placeholder="Ingrese la cantidad de redes">
+                </div>
+
+                <!-- Botón para generar -->
+                <button id="generarTabla" class="btn btn-primary">Generar Tabla</button>
+
+                <!-- Tabla de para ingresar host por cada subred -->
+                <div id="tablaResultados">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th># Red</th>
+                                <th>Cantidad de host </th>
+
+                            </tr>
+                        </thead>
+                        <tbody id="cuerpoTabla">
+                            <!-- Se llenará dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+
+
+
+
+
+
+                <div class="col-12">
+                    <button id="calcular" class="btn btn-primary"> Calcular</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Parte en donde se mostrarán los resoltados-->
+        <!-- Tabla para mostrar resultados -->
+        <div class="mt-4">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th># Red</th>
+                        <th>IP Subred</th>
+                        <th>Bits Máscara</th>
+                        <th>Máscara</th>
+                        <th>Hosts válidos</th>
+                    </tr>
+                </thead>
+                <tbody id="resultadosCalculo">
+                    <!-- Resultados se llenarán aquí -->
+                </tbody>
+            </table>
+        </div>
+
+
+
+
+
+
+
+    </main>
+
+    <script src="../JS/jquery-3.7.1.min.js"></script>
+    <script src="../JS/tablas.js"></script>
+    <script src="../JS/app.js"></script>
+
+</body>
+
+</html>
