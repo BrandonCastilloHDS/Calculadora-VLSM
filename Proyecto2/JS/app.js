@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    if (isNaN(bitsMascara) || bitsMascara < 0 || bitsMascara > 32) {
+    if (isNaN(bitsMascara) || bitsMascara <= 0 || bitsMascara > 32) {
       alert("Por favor, ingresa un número válido de bits para la máscara.");
       return;
     }
@@ -35,6 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    // Construir array con índice original y hosts
     const hostsPorRed = [];
     for (let i = 0; i < inputsHosts.length; i++) {
       const valHost = parseInt(inputsHosts[i].value);
@@ -42,52 +43,110 @@ document.addEventListener("DOMContentLoaded", () => {
         alert(`Por favor, ingresa un número válido de hosts para la red #${i + 1}.`);
         return;
       }
-      hostsPorRed.push(valHost);
+      hostsPorRed.push({ index: i, hosts: valHost });
     }
+
+    // Ordenamos de mayor a menor por hosts para subnetear bien
+    hostsPorRed.sort((a, b) => b.hosts - a.hosts);
 
     calcularSubneteo(ipBase, bitsMascara, hostsPorRed);
   });
 
-  function calcularSubneteo(ipBase, mascaraBitsOriginal, hostsPorRed) {
-    resultadosCalculo.innerHTML = ""; // limpiar tabla de resultados
+function calcularSubneteo(ipBase, mascaraBitsOriginal, hostsPorRed) {
+  resultadosCalculo.innerHTML = ""; // limpiar tabla
 
-    let baseIp = ipBase.split('.').map(Number);
-    let offset = 0;
+  let baseIp = ipBase.split('.').map(Number);
+  let offset = 0;
+  const resultados = [];
 
-    for (let i = 0; i < hostsPorRed.length; i++) {
-      const cantidadHost = hostsPorRed[i];
-      const N = Math.ceil(Math.log2(cantidadHost + 2));
-      const bitsNuevaMask = 32 - N;
-      const resultadoMask = calcularMask(bitsNuevaMask);
-      const saltoSubred = Math.pow(2, N);
+  for (const item of hostsPorRed) {
+    const cantidadHost = item.hosts;
+    const N = Math.ceil(Math.log2(cantidadHost + 2));
+    const bitsNuevaMask = 32 - N;
+    const resultadoMask = calcularMask(bitsNuevaMask);
+    
+    // Aquí usamos tu función para calcular salto
+    const saltoSubred = saltosSubred(resultadoMask);
 
-      let nuevaIp = baseIp.slice();
-      const indiceOcteto = posicionOcteto(resultadoMask);
+    let nuevaIp = baseIp.slice();
+    const indiceOcteto = posicionOcteto(resultadoMask);
 
-      nuevaIp[3 - indiceOcteto] += offset;
+    nuevaIp[3 - indiceOcteto] += offset;
 
-      for (let j = 3; j > 0; j--) {
-        if (nuevaIp[j] > 255) {
-          nuevaIp[j] -= 256;
-          nuevaIp[j - 1] += 1;
-        }
+    // Ajustar cuando hay overflow en octetos
+    for (let j = 3; j > 0; j--) {
+      if (nuevaIp[j] > 255) {
+        nuevaIp[j] -= 256;
+        nuevaIp[j - 1] += 1;
       }
-
-      const hostsValidos = saltoSubred - 2;
-
-      resultadosCalculo.innerHTML += `
-        <tr>
-          <th scope="row">${i + 1}</th>
-          <td>${nuevaIp.join(".")}</td>
-          <td>${bitsNuevaMask}</td>
-          <td>${resultadoMask.join(".")}</td>
-          <td>${hostsValidos}</td>
-        </tr>
-      `;
-
-      offset += saltoSubred;
     }
+
+    const hostsValidos = Math.pow(2, N) - 2;
+
+    // Calcular primera IP válida (IP red + 1)
+    const primeraIpValida = nuevaIp.slice();
+    primeraIpValida[3] += 1;
+    // Ajustar overflow si fuera necesario (raro que pase aquí, pero por seguridad)
+    for (let j = 3; j > 0; j--) {
+      if (primeraIpValida[j] > 255) {
+        primeraIpValida[j] -= 256;
+        primeraIpValida[j - 1] += 1;
+      }
+    }
+
+    // Calcular última IP válida (broadcast - 1)
+    const ultimaIpValida = nuevaIp.slice();
+    let broadcastIp = nuevaIp.slice();
+    broadcastIp[3 - indiceOcteto] += saltoSubred - 1;
+    // Ajustar overflow broadcast
+    for (let j = 3; j > 0; j--) {
+      while (broadcastIp[j] > 255) {
+        broadcastIp[j] -= 256;
+        broadcastIp[j - 1] += 1;
+      }
+    }
+    // Última IP válida es broadcast - 1
+    ultimaIpValida[3 - indiceOcteto] = broadcastIp[3 - indiceOcteto];
+    for(let k = 3; k > 0; k--){
+      ultimaIpValida[k] = broadcastIp[k];
+    }
+    // Restar 1 a la última IP válida
+    ultimaIpValida[3] -= 1;
+    for (let j = 3; j > 0; j--) {
+      if (ultimaIpValida[j] < 0) {
+        ultimaIpValida[j] += 256;
+        ultimaIpValida[j - 1] -= 1;
+      }
+    }
+
+    resultados.push({
+      index: item.index,
+      ip: nuevaIp.join("."),
+      bitsMask: bitsNuevaMask,
+      mask: resultadoMask.join("."),
+      hostsValidos: hostsValidos,
+      primeraIp: primeraIpValida.join("."),
+      ultimaIp: ultimaIpValida.join(".")
+    });
+
+    offset += saltoSubred;
   }
+
+  // Mostrar resultados, ahora con primera y última IP válida
+  for (const res of resultados) {
+    resultadosCalculo.innerHTML += `
+      <tr>
+        <th scope="row">${res.index + 1}</th>
+        <td>${res.ip}</td>
+        <td>${res.bitsMask}</td>
+        <td>${res.mask}</td>
+        <td>${res.hostsValidos}</td>
+        <td>${res.primeraIp}</td>
+        <td>${res.ultimaIp}</td>
+      </tr>
+    `;
+  }
+}
 
   function calcularMask(bits) {
     let mask = {
@@ -126,6 +185,16 @@ document.addEventListener("DOMContentLoaded", () => {
     let indice = [...octeto].reverse();
     for (let i = 0; i < indice.length; i++) {
       if (indice[i] !== 0) return i;
+    }
+    return 0;
+  }
+
+  function saltosSubred(mascaraDecimal) {
+    const octetos = [...mascaraDecimal].reverse();
+    for (let i = 0; i < octetos.length; i++) {
+      if (octetos[i] !== 0) {
+        return 256 - octetos[i];
+      }
     }
     return 0;
   }

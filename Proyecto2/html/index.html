@@ -20,7 +20,7 @@
             <h1>Calculadora <span> VLSM </span></h1>
             <p>Arenas Garita Miguel</p>
             <p>Castillo Maya Lorenzo Brandon</p>
-            <p>Diego Xd</p>
+
         </div>
     </header>
 
@@ -41,7 +41,7 @@
 
 
 
-        <div id="CalculadoraVLSM">
+        <div id="CalculadoraVLSM" class="CalculadoraVLSM">
             <form class="row g-3">
                 <div class="col-md-6">
                     <label for="DireccionIP" class="form-label">Dirección IP</label>
@@ -59,7 +59,7 @@
                 </div>
 
                 <!-- Botón para generar -->
-                <button id="generarTabla" class="btn btn-primary">Generar Tabla</button>
+                <button id="generarTabla" class="btn btn-primary">Generar Subredes</button>
 
                 <!-- Tabla de para ingresar host por cada subred -->
                 <div id="tablaResultados">
@@ -72,7 +72,7 @@
                             </tr>
                         </thead>
                         <tbody id="cuerpoTabla">
-                            <!-- Se llenará dinámicamente -->
+                           
                         </tbody>
                     </table>
                 </div>
@@ -94,13 +94,19 @@
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th># Red</th>
-                        <th>IP Subred</th>
+                        <th>#</th>
+                        <th>IP Red</th>
                         <th>Bits Máscara</th>
                         <th>Máscara</th>
-                        <th>Hosts válidos</th>
+                        <th>Hosts Válidos</th>
+                        <th>Primera IP Válida</th>
+                        <th>Última IP Válida</th>
                     </tr>
                 </thead>
+                <tbody id="resultadosCalculo">
+                    <!-- Aquí se insertan las filas -->
+                </tbody>
+
                 <tbody id="resultadosCalculo">
                     <!-- Resultados se llenarán aquí -->
                 </tbody>
